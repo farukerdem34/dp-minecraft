@@ -45,6 +45,20 @@ services:
     volumes:
       - "survival-data:/data:ro"
       - "survival-backups:/backups"
+  router:
+    image: itzg/mc-router
+    depends_on:
+      - flat
+      - survival
+    environment:
+      MAPPING: |
+        flat.mc-test.internal=flat:25565
+        survival.mc-test.internal=survival:25565
+    ports:
+      - "25565:25565"
+    networks:
+      - mc-network
+
 volumes:
   flat-data:
   flat-backups:
