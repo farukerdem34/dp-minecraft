@@ -2,13 +2,15 @@
 
 services:
   flat:
-    image: itzg/minecraft-server:latest
+    image: itzg/minecraft-server
     tty: true
     stdin_open: true
     env_file:
       - .flat.env
     volumes:
       - "flat-data:/data"
+      - "./downloads:/downloads"
+      - "./downloads:/mods"
     networks:
       - mc-network
   flat-backups:
@@ -23,37 +25,13 @@ services:
     volumes:
       - "flat-data:/data:ro"
       - "flat-backups:/backups"
-  survival:
-    image: itzg/minecraft-server:latest
-    tty: true
-    stdin_open: true
-    env_file:
-      - .survival.env
-    volumes:
-      - "survival-data:/data"
-    networks:
-      - mc-network  
-  survival-backups:
-    image: itzg/mc-backup
-    depends_on:
-      flat:
-        condition: service_healthy
-    environment:
-      BACKUP_INTERVAL: "24h"
-      RCON_HOST: mc
-      INITIAL_DELAY: 0
-    volumes:
-      - "survival-data:/data:ro"
-      - "survival-backups:/backups"
   router:
     image: itzg/mc-router
     depends_on:
       - flat
-      - survival
     environment:
       MAPPING: |
         flat.mc-test.internal=flat:25565
-        survival.mc-test.internal=survival:25565
     ports:
       - "25565:25565"
     networks:
@@ -62,8 +40,6 @@ services:
 volumes:
   flat-data:
   flat-backups:
-  survival-data:
-  survival-backups:
 
 networks:
   mc-network:
